@@ -103,6 +103,67 @@ namespace Ksu.Cis300.NameLookup
             }
         }
 
+        private static BinaryTreeNode<KeyValuePair<TKey, TValue>> RemoveMininumKey(BinaryTreeNode<KeyValuePair<TKey, TValue>> t, out KeyValuePair<TKey, TValue> min)
+        {
+            if (t.LeftChild == null)
+            {
+                min = t.Data;
+                return t.RightChild;
+            }
+            else
+            {
+                BinaryTreeNode<KeyValuePair<TKey, TValue>> result = RemoveMininumKey(t.LeftChild, out min);
+                return new BinaryTreeNode<KeyValuePair<TKey, TValue>>(t.Data, result, t.RightChild);
+            }
+        }
+
+        private static BinaryTreeNode<KeyValuePair<TKey, TValue>> Remove(TKey key, BinaryTreeNode<KeyValuePair<TKey, TValue>> t, out bool removed)
+        {
+            if (t == null)
+            {
+                removed = false;
+                return null;
+            }
+            int difference = key.CompareTo(t.Data.Key);
+            if(difference == 0)
+            {
+                removed = true;
+                if (t.RightChild == null)
+                {
+                    
+                    return t.LeftChild;
+                }
+                else if(t.LeftChild == null)
+                {
+                    //removed = true;
+                    return t.RightChild;
+                }
+                else //Build a new tree
+                {
+                    BinaryTreeNode<KeyValuePair<TKey, TValue >> right = RemoveMininumKey(t.RightChild, out KeyValuePair<TKey, TValue> min);
+                    BinaryTreeNode<KeyValuePair<TKey, TValue>> newTree = new BinaryTreeNode<KeyValuePair<TKey, TValue>>(min, t.LeftChild, right);
+                    //removed = true;
+                    return newTree;
+                }
+            }
+            else if(difference < 0)
+            {
+
+                return new BinaryTreeNode<KeyValuePair<TKey, TValue>>(t.Data, Remove(key, t.LeftChild, out removed), t.RightChild);
+            }
+            else
+            {
+                return new BinaryTreeNode<KeyValuePair<TKey, TValue>>(t.Data, t.LeftChild, Remove(key, t.RightChild, out removed));
+            }
+        }
+
+        public bool Remove(TKey k)
+        {
+            CheckKey(k);
+            _elements = Remove(k, _elements, out bool removed);
+            return removed;
+        }
+
         /// <summary>
         /// Tries to get the value associated with the given key.
         /// </summary>
